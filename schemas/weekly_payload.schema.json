@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "weekly_payload.schema.json",
+  "title": "Long-Horizon Agentic Analysis Payload (weekly batch to deep-tier model)",
+  "type": "object",
+  "required": ["client_pseudonym_id", "week_of", "session_summaries"],
+  "properties": {
+    "client_pseudonym_id": { "type": "string", "description": "Salted hash. No PHI/PII permitted anywhere in this payload." },
+    "week_of": { "type": "string", "format": "date" },
+    "session_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string", "format": "uuid" },
+          "total_trials": { "type": "integer" },
+          "accuracy_by_domain": { "type": "object", "additionalProperties": { "type": "number" } },
+          "prompt_dependency_index": { "type": "number", "minimum": 0, "maximum": 1 },
+          "environment_context": {
+            "type": "object",
+            "properties": {
+              "ambient_noise_db_mean": { "type": "number" },
+              "lighting_variation_index": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "abc_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "antecedent": { "type": "string" },
+          "behavior": { "type": "string" },
+          "consequence": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "rolling_summaries": {
+      "type": "object",
+      "description": "Revision A2: hierarchical summaries instead of raw history dump",
+      "properties": {
+        "month_summary_ref": { "type": "string" },
+        "retrieved_fragments": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

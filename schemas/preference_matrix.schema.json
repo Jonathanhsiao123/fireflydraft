@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "preference_matrix.schema.json",
+  "title": "Dynamic Preference Assessment Entry (MSWO)",
+  "type": "object",
+  "required": ["stimulus_item_id", "presentation_frequency", "selection_frequency", "computed_preference_index"],
+  "properties": {
+    "stimulus_item_id": { "type": "string" },
+    "presentation_frequency": { "type": "integer", "minimum": 0 },
+    "selection_frequency": { "type": "integer", "minimum": 0 },
+    "average_dwell_time_s": { "type": "number", "minimum": 0 },
+    "avoidance_event_count": { "type": "integer", "minimum": 0 },
+    "computed_preference_index": { "type": "number", "minimum": 0, "maximum": 1 },
+    "satiation_flag": { "type": "boolean", "description": "Set by cognition layer when reinforcer efficacy decays" },
+    "sensory_profile_cleared": { "type": "boolean", "description": "Revision C2: effect passed per-child sensory filter" }
+  }
+}

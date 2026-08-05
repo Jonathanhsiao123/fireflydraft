@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dtt_trial.schema.json",
+  "title": "DTT Trial Record",
+  "type": "object",
+  "required": ["trial_id", "session_id", "target_skill_domain", "prompt_hierarchy_level", "response_latency_ms", "response_classification"],
+  "properties": {
+    "trial_id": { "type": "string", "format": "uuid" },
+    "session_id": { "type": "string", "format": "uuid" },
+    "target_skill_domain": { "type": "string", "examples": ["joint_attention_responsive", "noun_picture_identification", "motor_imitation"] },
+    "discriminative_stimulus": {
+      "type": "object",
+      "properties": {
+        "content_text": { "type": "string" },
+        "modality": { "type": "string", "enum": ["voice", "ar_visual", "voice+ar_visual"] },
+        "anchor_position": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+      }
+    },
+    "prompt_hierarchy_level": { "type": "integer", "minimum": 0, "maximum": 3, "description": "0=independent 1=light visual 2=virtual gesture 3=full guidance" },
+    "response_latency_ms": { "type": "number", "minimum": 0 },
+    "response_classification": { "type": "string", "enum": ["correct", "prompted_correct", "incorrect", "partial", "no_response", "off_task"] },
+    "applied_consequence": { "type": "string" },
+    "assent_status": { "type": "string", "enum": ["engaged", "withdraw_requested", "session_terminated"], "description": "Revision C6: child assent tracking is mandatory" }
+  }
+}

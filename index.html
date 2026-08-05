@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>螢火平台 MVP · AR + ABA 訓練系統</title>
+<meta name="description" content="平板優先的 ABA 訓練 MVP：DTT 圖形指認、MSWO 偏好評估、本地資料儀表板。所有資料僅存於本機瀏覽器。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="mark">螢<em>火</em>平台 <small>Phase 0 MVP · 邊緣規則引擎 · 無雲端</small></div>
+  <nav aria-label="主導覽">
+    <button class="navbtn" data-view="home" aria-current="true">開始</button>
+    <button class="navbtn" data-view="dtt">DTT 訓練</button>
+    <button class="navbtn" data-view="mswo">偏好評估</button>
+    <button class="navbtn" data-view="dash">數據儀表板</button>
+    <button class="navbtn" data-view="settings">參數設定</button>
+  </nav>
+  <span class="pseud" id="pseudLabel">個案：—</span>
+</header>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="view active" id="view-home">
+  <h1>開始一場會話</h1>
+  <p class="lede">Phase 0 MVP 對應 <span class="mono">docs/01</span> 路線圖：平板載具、單一技能領域、確定性規則引擎完全在本機執行，不呼叫任何雲端模型。所有紀錄僅保存在此瀏覽器（localStorage），可隨時匯出 JSON。</p>
+  <div class="modulepick">
+    <button class="modcard" data-goto="dtt">
+      <span class="tag">臨床模組 1</span>
+      <h3>DTT 離散嘗試訓練 · 圖形指認</h3>
+      <p>無錯誤學習 + 四級提示褪除 + 代幣經濟 + 錯誤修正閉環。增強物自動採用最近一次偏好評估的最高偏好項目。內建休息卡（FCT）與個案中止權（assent）。</p>
+    </button>
+    <button class="modcard" data-goto="mswo">
+      <span class="tag">臨床模組 2</span>
+      <h3>MSWO 多刺激不替換偏好評估</h3>
+      <p>五項刺激物輪次選擇，記錄選擇順序與互動時長，計算動態偏好階層矩陣。建議每週執行一次，或在儀表板出現飽足訊號時重測。</p>
+    </button>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card kpi"><div class="eyebrow">累計會話</div><div class="num" id="homeSessions">0</div><div class="sub">DTT + MSWO</div></div>
+    <div class="card kpi"><div class="eyebrow">累計試驗</div><div class="num" id="homeTrials">0</div><div class="sub">dtt_trial 紀錄</div></div>
+    <div class="card kpi"><div class="eyebrow">最近獨立正確率</div><div class="num" id="homeAcc">—</div><div class="sub" id="homeAccSub">尚無資料</div></div>
+  </div>
+  <div class="note" style="margin-top:16px"><b>隱私設計（修訂 D1）：</b>本 MVP 不採集影像與音訊，所有互動以觸控 / 點擊量化；資料不離開此裝置。語音指令由瀏覽器本機合成（可於設定關閉）。</div>
+</section>
+
+<!-- ================= DTT ================= -->
+<section class="view" id="view-dtt">
+  <h1>DTT 訓練 · 圖形指認</h1>
+  <p class="lede" id="dttLede">按「開始會話」後，虛擬化身會發出區辨刺激（SD）。點擊正確物件完成試驗；答錯會啟動錯誤修正並將該目標的提示回升一級；同一目標連續達標則自動褪除。</p>
+
+  <div class="grid" style="grid-template-columns:1.55fr 1fr">
+    <div>
+      <div class="stage" id="stage">
+        <div class="gridbg"></div>
+        <div class="hud"><span id="hudLeft">EDGE · RULE-ENGINE v1.0</span><span class="rec">● 本地記錄 · 無影音採集</span></div>
+        <div class="avatar" aria-hidden="true"><svg viewBox="0 0 100 120">
+          <ellipse cx="50" cy="112" rx="30" ry="7" fill="rgba(34,49,43,.12)"/>
+          <path d="M50 38 C24 38 20 66 24 96 Q50 110 76 96 C80 66 76 38 50 38Z" fill="#6E5B94"/>
+          <circle cx="50" cy="30" r="21" fill="#F5E3CE"/>
+          <path d="M29 26 Q50 2 71 26 Q60 16 50 17 Q40 16 29 26Z" fill="#4A3E68"/>
+          <circle cx="43" cy="30" r="2.6" fill="#22312B"/><circle cx="57" cy="30" r="2.6" fill="#22312B"/>
+          <path d="M44 39 Q50 44 56 39" stroke="#22312B" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg></div>
+        <div class="bubble" id="bubble">…</div>
+        <div class="tokenboard"><div class="lbl">TOKEN BOARD</div><div class="slots" id="slots"></div></div>
+        <div class="timerchip" id="restTimer">休息 01:00</div>
+        <div class="desk"></div>
+        <div class="choices" id="choices"></div>
+        <button class="breakbtn" id="breakBtn" hidden>🃏 我想休息一下（<span id="breakLeft">2</span>）</button>
+        <button class="stopbtn" id="stopBtn" hidden>✋ 我不想玩了</button>
+        <div class="overlay" id="overlay"><div class="inner" id="overlayText">✦</div></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn big" id="startSession">開始會話</button>
+        <button class="btn ghost" id="endSession" disabled>結束並儲存會話</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="eyebrow">規則引擎狀態</div>
+        <div class="statuschips">
+          <span class="chip" id="chipState">待機</span>
+          <span class="chip" id="chipTrial">試驗 0 / 0</span>
+          <span class="chip" id="chipAcc">獨立正確率 —</span>
+          <span class="chip hot" id="chipLat">延遲 —</span>
+        </div>
+        <h2 style="font-size:15px">提示層級 <span class="mono" id="ladderTarget" style="color:var(--ink-soft)"></span></h2>
+        <div class="ladder" id="ladder">
+          <div class="rung" data-lv="3"><span class="lv">L3</span>強引導：目標放大 + 干擾物淡出</div>
+          <div class="rung" data-lv="2"><span class="lv">L2</span>手勢提示：虛擬箭頭指向目標</div>
+          <div class="rung" data-lv="1"><span class="lv">L1</span>視覺提示：目標周圍光暈</div>
+          <div class="rung now" data-lv="0"><span class="lv">L0</span>獨立完成：無任何提示</div>
+        </div>
+        <div class="note">提示層級<b>依目標各自追蹤</b>；連續 <span id="fadeRuleTxt">4</span> 次達標褪除一級，答錯回升一級（無錯誤學習）。逾時 <span id="timeoutTxt">10</span>s 記為 no_response 並重新提示。</div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">試驗紀錄（dtt_trial）</div>
+        <div class="log" id="log">— 尚無試驗 —</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MSWO ================= -->
+<section class="view" id="view-mswo">
+  <h1>MSWO 偏好評估</h1>
+  <p class="lede">請個案「選一個」想玩的。選中的刺激物會啟動互動並開始計時；按「玩好了」結束互動，該物件即被移除（不替換），其餘重新排列進入下一輪。全部完成後自動計算偏好階層矩陣，DTT 模組會採用最高偏好項目作為主要增強物。</p>
+  <div class="stage mswo-stage" id="mswoStage">
+    <div class="gridbg"></div>
+    <div class="hud"><span>MSWO · ROUND <span id="mswoRound">–</span>/5</span><span id="mswoDwell"></span></div>
+    <div class="bubble" id="mswoBubble" style="left:4%;top:6%">…</div>
+    <div class="mswo-cards" id="mswoCards"></div>
+    <div class="overlay" id="mswoOverlay"><div class="inner" id="mswoOverlayText">✦</div></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center">
+    <button class="btn big" id="mswoStart">開始評估</button>
+    <button class="btn ghost" id="mswoDone" hidden>玩好了，換下一個</button>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>最近一次偏好階層矩陣</h2>
+    <div id="prefTable"><p style="color:var(--ink-soft);font-size:13.5px">尚未執行評估。</p></div>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section class="view" id="view-dash">
+  <h1>數據儀表板</h1>
+  <p class="lede">所有統計由本機保存的真實試驗紀錄計算（非模擬數字）。這一層對應藍圖中的 BCBA 觀察端；Phase 2 之後才會把去識別化摘要餵給 deep-tier 模型做週期覆盤。</p>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="eyebrow">DTT 會話</div><div class="num" id="dSessions">0</div></div>
+    <div class="card kpi"><div class="eyebrow">總試驗數</div><div class="num" id="dTrials">0</div></div>
+    <div class="card kpi"><div class="eyebrow">整體獨立正確率</div><div class="num" id="dAcc">—</div></div>
+    <div class="card kpi"><div class="eyebrow">平均反應延遲</div><div class="num" id="dLat">—</div></div>
+  </div>
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card">
+      <h2>獨立正確率趨勢（各會話）</h2>
+      <div id="chartAcc"></div>
+    </div>
+    <div class="card">
+      <h2>反應分類分佈</h2>
+      <div id="chartCls"></div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card">
+      <h2>各目標提示層級（最近會話結束時）</h2>
+      <div id="targetLevels"><p style="color:var(--ink-soft);font-size:13.5px">尚無資料。</p></div>
+    </div>
+    <div class="card">
+      <h2>會話列表</h2>
+      <div id="sessionList" style="max-height:260px;overflow:auto"><p style="color:var(--ink-soft);font-size:13.5px">尚無資料。</p></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>資料管理</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="exportBtn">匯出 JSON</button>
+      <label class="btn ghost" style="display:inline-block">匯入 JSON<input type="file" id="importFile" accept=".json" hidden></label>
+      <button class="btn clay" id="wipeBtn">清除所有本機資料</button>
+    </div>
+    <div class="note"><b>格式相容：</b>匯出檔案的 trial 欄位對齊 <span class="mono">schemas/dtt_trial.schema.json</span>（含 assent_status），未來可直接作為 L1 → L2 上行酬載。</div>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section class="view" id="view-settings">
+  <h1>參數設定（BCBA 授權層）</h1>
+  <p class="lede">以下皆為藍圖修訂 C2 / C3 所定義的授權參數：邊緣引擎只讀取、不自動調整。變更即時生效並保存在本機。</p>
+  <div class="card" style="margin-bottom:16px">
+    <h2>個案與感官設定檔</h2>
+    <div class="formrow"><label for="setPseud">個案假名代碼</label><input id="setPseud" maxlength="24" placeholder="例如 PSN-8f3a">
+      <span class="hint">僅用於顯示與匯出檔標記。請勿輸入真實姓名或可識別資訊（修訂 D1）。</span></div>
+    <div class="formrow"><label for="setLowStim">低刺激增強模式</label><input type="checkbox" id="setLowStim" checked>
+      <span class="hint">停用高強度特效，慶祝畫面改為柔光 + 靜態圖示。預設開啟，關閉需 BCBA 依感官設定檔評估。</span></div>
+    <div class="formrow"><label for="setSound">語音 SD 與音效</label><input type="checkbox" id="setSound" checked>
+      <span class="hint">使用瀏覽器本機語音合成唸出指令（zh-TW），不錄音、不上傳。</span></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <h2>DTT 引擎參數</h2>
+    <div class="formrow"><label for="setTrials">每會話試驗數</label><input type="number" id="setTrials" min="5" max="60" step="5" value="20"></div>
+    <div class="formrow"><label for="setTokens">代幣板格數（集滿觸發增強）</label><input type="number" id="setTokens" min="3" max="10" value="5"></div>
+    <div class="formrow"><label for="setFade">褪除門檻（連續達標次數）</label><input type="number" id="setFade" min="2" max="8" value="4">
+      <span class="hint">同一目標於當前層級連續達標 N 次即褪除一級。</span></div>
+    <div class="formrow"><label for="setTimeout">反應逾時（秒）</label><input type="number" id="setTimeout" min="5" max="30" value="10"></div>
+  </div>
+  <div class="card">
+    <h2>FCT 休息卡（授權參數，修訂 C3）</h2>
+    <div class="formrow"><label for="setBreaks">每會話休息卡可用次數</label><input type="number" id="setBreaks" min="0" max="6" value="2"></div>
+    <div class="formrow"><label for="setBreakLen">休息時長（秒）</label><input type="number" id="setBreakLen" min="15" max="180" step="15" value="60"></div>
+    <div class="note warn"><b>提醒：</b>「我不想玩了」中止鈕（assent，修訂 C6）恆為可用，不受此處限制，任何人不得停用。</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  螢火平台 Phase 0 MVP · 開源雛形 · 資料僅存本機瀏覽器。本工具僅供工程與教學展示，不構成醫療建議；臨床干預方案請諮詢持證行為分析師（BCBA）。<br>
+  架構文件：<span class="mono">docs/</span> · 資料契約：<span class="mono">schemas/</span> · 風險修訂：<span class="mono">docs/08-risk-review.md</span>
+</footer>
+
+<script src="js/items.js"></script>
+<script src="js/store.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/mswo.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

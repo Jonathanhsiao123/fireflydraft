@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ja_trial.schema.json",
+  "title": "Joint Attention Trial Record",
+  "type": "object",
+  "required": ["ja_trial_type", "initiating_agent", "gaze_features"],
+  "properties": {
+    "ja_trial_type": { "type": "string", "enum": ["RJA", "IJA"] },
+    "initiating_agent": { "type": "string", "enum": ["ar_avatar", "human_caregiver"] },
+    "target_object_coordinates": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+    "gaze_features": {
+      "type": "object",
+      "description": "Revision A4: raw 60Hz trajectory stays on-device; only derived features are uploaded",
+      "properties": {
+        "first_fixation_latency_ms": { "type": "number" },
+        "gaze_shift_count": { "type": "integer" },
+        "sustained_attention_duration_s": { "type": "number" },
+        "dwell_histogram": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "outcome": { "type": "string", "enum": ["success", "prompted_success", "fail", "no_response"] }
+  }
+}
