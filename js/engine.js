@@ -146,11 +146,10 @@ function renderChoices(choices, targetKey){
     b.className = "obj"; b.dataset.key = item.key; b.setAttribute("aria-label", item.name);
     b.innerHTML = `<svg viewBox="0 0 100 100">${item.svg}</svg>`;
     if(item.key===targetKey){
+      // 修訂：所有選項一律等大等亮呈現，提示只疊加於目標本身
       if(lv===1) b.classList.add("p-halo");
       if(lv===2) b.classList.add("p-arrow");
-      if(lv===3) b.classList.add("p-halo","p-grow");
-    }else if(lv===3){
-      b.classList.add("dimmed"); // 強引導：干擾物淡出
+      if(lv===3) b.classList.add("p-halo","p-arrow");
     }
     b.addEventListener("click", ()=>classify(item.key));
     ui.choices.appendChild(b);

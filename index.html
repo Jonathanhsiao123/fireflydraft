@@ -93,9 +93,9 @@
         </div>
         <h2 style="font-size:15px">提示層級 <span class="mono" id="ladderTarget" style="color:var(--ink-soft)"></span></h2>
         <div class="ladder" id="ladder">
-          <div class="rung" data-lv="3"><span class="lv">L3</span>強引導：目標放大 + 干擾物淡出</div>
+          <div class="rung" data-lv="3"><span class="lv">L3</span>強提示：光暈 + 箭頭同時出現</div>
           <div class="rung" data-lv="2"><span class="lv">L2</span>手勢提示：虛擬箭頭指向目標</div>
-          <div class="rung" data-lv="1"><span class="lv">L1</span>視覺提示：目標周圍光暈</div>
+          <div class="rung" data-lv="1"><span class="lv">L1</span>視覺提示：目標周圍柔和光暈</div>
           <div class="rung now" data-lv="0"><span class="lv">L0</span>獨立完成：無任何提示</div>
         </div>
         <div class="note">提示層級<b>依目標各自追蹤</b>；連續 <span id="fadeRuleTxt">4</span> 次達標褪除一級，答錯回升一級（無錯誤學習）。逾時 <span id="timeoutTxt">10</span>s 記為 no_response 並重新提示。</div>
@@ -111,12 +111,13 @@
 <!-- ================= MSWO ================= -->
 <section class="view" id="view-mswo">
   <h1>MSWO 偏好評估</h1>
-  <p class="lede">請個案「選一個」想玩的。選中的刺激物會啟動互動並開始計時；按「玩好了」結束互動，該物件即被移除（不替換），其餘重新排列進入下一輪。全部完成後自動計算偏好階層矩陣，DTT 模組會採用最高偏好項目作為主要增強物。</p>
+  <p class="lede">請個案「選一個」想玩的。選中後會開啟該玩具的小遊戲，系統記錄互動時長與互動次數；按「玩好了」結束，該玩具即被移除（不替換），其餘重新排列進入下一輪。全部完成後自動計算偏好階層矩陣，DTT 模組會採用最高偏好項目作為主要增強物。</p>
   <div class="stage mswo-stage" id="mswoStage">
     <div class="gridbg"></div>
     <div class="hud"><span>MSWO · ROUND <span id="mswoRound">–</span>/5</span><span id="mswoDwell"></span></div>
     <div class="bubble" id="mswoBubble" style="left:4%;top:6%">…</div>
     <div class="mswo-cards" id="mswoCards"></div>
+    <div class="playarea" id="playarea" hidden></div>
     <div class="overlay" id="mswoOverlay"><div class="inner" id="mswoOverlayText">✦</div></div>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center">

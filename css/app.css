@@ -91,8 +91,6 @@ td{padding:8px;border-bottom:1px solid #E7EEE9;vertical-align:top}
 .obj.p-halo .halo{opacity:1;animation:pulse 1.6s ease-in-out infinite}
 .obj .harrow{opacity:0}
 .obj.p-arrow .harrow{opacity:1;animation:bounce 1s ease-in-out infinite}
-.obj.p-grow{transform:scale(1.2)}
-.obj.dimmed{opacity:.32;filter:grayscale(.55)}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .tokenboard{position:absolute;right:2.2%;top:9%;background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:12px;padding:8px 10px;z-index:6;text-align:center}
@@ -144,3 +142,49 @@ td{padding:8px;border-bottom:1px solid #E7EEE9;vertical-align:top}
 .modcard p{font-size:13px;color:var(--ink-soft)}
 footer{max-width:1100px;margin:0 auto;padding:0 26px 40px;font-size:12px;color:var(--ink-soft);line-height:1.8}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- DTT 提示柔化（v2：選項一律等大等亮） ---------- */
+.obj .halo{stroke-width:3.5px}
+.obj.p-halo .halo{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.85}}
+
+/* ---------- MSWO 小遊戲區 ---------- */
+.playarea{position:absolute;inset:14% 5% 8%;background:rgba(255,255,255,.6);backdrop-filter:blur(2px);
+  border:1px solid var(--line);border-radius:18px;z-index:5;overflow:hidden;touch-action:manipulation}
+.pa-hint{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:14px;color:var(--ink-soft);pointer-events:none;z-index:3}
+
+/* 泡泡 */
+.pa-bubble{position:absolute;bottom:-90px;border:0;border-radius:50%;cursor:pointer;
+  box-shadow:inset 0 0 10px rgba(255,255,255,.6);animation:pa-rise var(--rise,7s) linear forwards}
+@keyframes pa-rise{to{transform:translateY(-620px)}}
+.pa-bubble.pop{transition:transform .18s,opacity .18s;transform:translateY(var(--y,0)) scale(1.7)!important;opacity:0;animation-play-state:paused}
+
+/* 音樂盒 */
+.pa-keys{position:absolute;inset:auto 8% 12%;top:22%;display:flex;gap:3%;align-items:stretch}
+.pa-key{flex:1;border:0;border-radius:14px 14px 20px 20px;font-family:var(--sans);font-size:15px;font-weight:500;
+  color:#2C4150;padding-top:52%;box-shadow:0 5px 0 rgba(34,49,43,.18);transition:transform .12s,box-shadow .12s;cursor:pointer}
+.pa-key.on{transform:translateY(4px);box-shadow:0 1px 0 rgba(34,49,43,.18);filter:brightness(1.08)}
+
+/* 小火車 */
+.pa-track{position:absolute;left:4%;right:4%;bottom:17%;height:6px;background:#B78F63;border-radius:99px}
+.pa-track::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,255,255,.4) 26px 30px);border-radius:99px}
+.pa-train{position:absolute;bottom:calc(17% - 8px);width:118px;height:118px;border:0;background:none;cursor:pointer;transition:left .35s ease;z-index:2}
+.pa-train svg{width:100%;height:100%;filter:drop-shadow(0 6px 6px rgba(34,49,43,.25))}
+.pa-train.hop{animation:pa-hop .26s ease}
+@keyframes pa-hop{50%{transform:translateY(-18px)}}
+
+/* 齒輪 */
+.pa-gearwrap{position:absolute;inset:0;cursor:pointer}
+.pa-gear{position:absolute;will-change:transform}
+.pa-gear svg{width:100%;height:100%;filter:drop-shadow(0 4px 5px rgba(34,49,43,.2))}
+.pa-gear.g1{width:170px;height:170px;left:calc(50% - 150px);top:calc(50% - 70px)}
+.pa-gear.g2{width:118px;height:118px;left:calc(50% + 8px);top:calc(50% - 118px)}
+
+/* 風車 */
+.pa-pinzone{position:absolute;inset:0;cursor:pointer}
+.pa-blades{position:absolute;width:190px;height:190px;left:calc(50% - 95px);top:calc(50% - 130px);will-change:transform}
+.pa-blades svg{width:100%;height:100%;filter:drop-shadow(0 4px 5px rgba(34,49,43,.2))}
+.pa-stick{position:absolute;width:9px;height:34%;left:calc(50% - 4.5px);top:calc(50% - 40px);background:#8A6E5A;border-radius:99px}
+.pa-puff{position:absolute;left:calc(50% - 150px);top:calc(50% - 46px);font-size:20px;color:var(--ink-soft);opacity:0}
+.pa-puff.go{animation:pa-puff .7s ease}
+@keyframes pa-puff{0%{opacity:0;transform:translateX(-16px)}30%{opacity:.9}100%{opacity:0;transform:translateX(26px)}}
